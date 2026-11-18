@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Funds · Aldermoor Capital</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header><a href="/">Aldermoor Capital · Fund Operations</a></header>
+  <main>
+    <h1>Funds</h1>
+    <p class="muted">Select a fund to see its LPs, capital calls and distributions.</p>
+    <table>
+      <thead>
+        <tr><th>Fund</th><th>Vintage</th><th class="num">LPs</th><th class="num">Total commitments</th></tr>
+      </thead>
+      <tbody id="funds"></tbody>
+    </table>
+    <p id="message" class="message"></p>
+  </main>
+  <script type="module" src="/js/funds.js"></script>
+</body>
+</html>

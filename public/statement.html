@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Quarterly statement · Aldermoor Capital</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header><a href="/">Aldermoor Capital · Fund Operations</a></header>
+  <main>
+    <p><a id="back-link" href="/">&larr; Back to fund</a></p>
+    <h1 id="lp-name">Quarterly statement</h1>
+    <p class="muted" id="statement-meta"></p>
+
+    <form id="quarter-form" class="card">
+      <label>Quarter
+        <select name="quarter">
+          <option>2026-Q1</option>
+          <option>2026-Q2</option>
+          <option>2026-Q3</option>
+          <option>2026-Q4</option>
+        </select>
+      </label>
+      <button type="submit">Show</button>
+    </form>
+    <p id="message" class="message"></p>
+
+    <div class="summary">
+      <div><span class="muted">Commitment</span><strong id="commitment">–</strong></div>
+      <div><span class="muted">Called this quarter</span><strong id="called-quarter">–</strong></div>
+      <div><span class="muted">Distributed this quarter</span><strong id="distributed-quarter">–</strong></div>
+      <div><span class="muted">Called to date</span><strong id="called-cumulative">–</strong></div>
+      <div><span class="muted">Distributed to date</span><strong id="distributed-cumulative">–</strong></div>
+      <div><span class="muted">Unfunded commitment</span><strong id="unfunded">–</strong></div>
+    </div>
+
+    <h2>Capital calls this quarter</h2>
+    <table>
+      <thead><tr><th>Date</th><th>Purpose</th><th class="num">Your share</th></tr></thead>
+      <tbody id="calls"></tbody>
+    </table>
+
+    <h2>Distributions this quarter</h2>
+    <table>
+      <thead><tr><th>Date</th><th>Description</th><th class="num">Your share</th></tr></thead>
+      <tbody id="distributions"></tbody>
+    </table>
+  </main>
+  <script type="module" src="/js/statement.js"></script>
+</body>
+</html>

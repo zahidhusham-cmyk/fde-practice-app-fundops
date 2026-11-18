@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Fund · Aldermoor Capital</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header><a href="/">Aldermoor Capital · Fund Operations</a></header>
+  <main>
+    <h1 id="fund-name">Loading…</h1>
+    <p class="muted" id="fund-meta"></p>
+    <p id="message" class="message"></p>
+
+    <h2>Limited partners</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>LP</th>
+          <th class="num">Commitment</th>
+          <th class="num">Called to date</th>
+          <th class="num">Distributed to date</th>
+          <th class="num">Unfunded</th>
+        </tr>
+      </thead>
+      <tbody id="lps"></tbody>
+      <tfoot id="lp-totals"></tfoot>
+    </table>
+
+    <h2>Capital calls</h2>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Purpose</th><th class="num">Amount called</th><th class="num">Allocated to LPs</th></tr>
+      </thead>
+      <tbody id="calls"></tbody>
+    </table>
+
+    <h2>New capital call</h2>
+    <form id="call-form" class="card">
+      <label>Call date <input type="date" name="call_date" required></label>
+      <label>Amount (USD) <input type="text" name="amount" placeholder="1,000,000.00" required></label>
+      <label>Purpose <input type="text" name="purpose" maxlength="200" size="36"></label>
+      <button type="submit">Create call</button>
+    </form>
+    <p id="call-message" class="message"></p>
+
+    <h2>Distributions</h2>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Description</th><th class="num">Amount distributed</th><th class="num">Allocated to LPs</th></tr>
+      </thead>
+      <tbody id="distributions"></tbody>
+    </table>
+  </main>
+  <script type="module" src="/js/fund.js"></script>
+</body>
+</html>
