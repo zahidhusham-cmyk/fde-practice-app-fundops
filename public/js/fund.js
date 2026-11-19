@@ -114,6 +114,34 @@ document.getElementById("distribution-form").addEventListener("submit", async (e
   }
 });
 
+document.getElementById("lp-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const lpMessage = document.getElementById("lp-message");
+  const data = new FormData(form);
+  const commitmentCents = dollarsToCents(data.get("amount"));
+  if (commitmentCents === null || commitmentCents <= 0) {
+    showMessage(lpMessage, "Enter a positive dollar amount, e.g. 50000000.00", "error");
+    return;
+  }
+  const name = data.get("name");
+  if (!name || typeof name !== "string" || !name.trim()) {
+    showMessage(lpMessage, "Enter a non-empty LP name", "error");
+    return;
+  }
+  try {
+    const lp = await postJson(`/api/funds/${fundId}/lps`, {
+      name: name.trim(),
+      commitment_cents: commitmentCents,
+    });
+    showMessage(lpMessage, `Added ${lp.name} with ${formatCents(lp.commitment_cents)} commitment.`, "ok");
+    form.reset();
+    await loadFund();
+  } catch (err) {
+    showMessage(lpMessage, err.message, "error");
+  }
+});
+
 if (!fundId) {
   showMessage(message, "No fund selected.", "error");
 } else {

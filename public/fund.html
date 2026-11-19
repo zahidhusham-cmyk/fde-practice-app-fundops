@@ -27,6 +27,14 @@
       <tfoot id="lp-totals"></tfoot>
     </table>
 
+    <h2>Add new LP</h2>
+    <form id="lp-form" class="card">
+      <label>LP name <input type="text" name="name" placeholder="e.g., Acme Pension Fund" required></label>
+      <label>Commitment (USD) <input type="text" name="amount" placeholder="50,000,000.00" required></label>
+      <button type="submit">Add LP</button>
+    </form>
+    <p id="lp-message" class="message"></p>
+
     <h2>Capital calls</h2>
     <table>
       <thead>

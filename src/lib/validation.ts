@@ -28,6 +28,16 @@ export function parseDate(value: unknown, name: string): string {
   return value;
 }
 
+export function parseText(value: unknown, name: string, maxLength = 200): string {
+  if (typeof value !== "string") throw new ValidationError(`${name} must be a string`);
+  const trimmed = value.trim();
+  if (trimmed.length === 0) throw new ValidationError(`${name} must not be empty`);
+  if (trimmed.length > maxLength) {
+    throw new ValidationError(`${name} must be at most ${maxLength} characters`);
+  }
+  return trimmed;
+}
+
 export function parseOptionalText(value: unknown, name: string, maxLength = 200): string {
   if (value === undefined || value === null) return "";
   if (typeof value !== "string") throw new ValidationError(`${name} must be a string`);

@@ -1,7 +1,7 @@
 import { pool } from "../db/pool";
 import * as fundQueries from "../db/queries/funds";
 import * as lpQueries from "../db/queries/lps";
-import { NotFoundError } from "../lib/errors";
+import { NotFoundError, ValidationError } from "../lib/errors";
 
 export async function listFunds() {
   return fundQueries.listFunds(pool);
@@ -29,4 +29,36 @@ export async function getFundDetail(fundId: number) {
   );
 
   return { fund, lps, totals };
+}
+
+export interface CreateLpInput {
+  fundId: number;
+  name: string;
+  commitmentCents: number;
+}
+
+/** Create a new LP for a fund. */
+export async function createLp(input: CreateLpInput) {
+  // Validate fund exists
+  const fund = await fundQueries.getFund(pool, input.fundId);
+  if (!fund) throw new NotFoundError(`Fund ${input.fundId} not found`);
+
+  // Validate LP name is not empty
+  if (!input.name || typeof input.name !== "string" || !input.name.trim()) {
+    throw new ValidationError("LP name must be a non-empty string");
+  }
+
+  // Validate commitment is positive
+  if (
+    typeof input.commitmentCents !== "number" ||
+    !Number.isSafeInteger(input.commitmentCents) ||
+    input.commitmentCents <= 0
+  ) {
+    throw new ValidationError("commitment_cents must be a positive integer number of cents");
+  }
+
+  // Insert the LP
+  const lp = await lpQueries.insertLp(pool, input.fundId, input.name.trim(), input.commitmentCents);
+
+  return lp;
 }

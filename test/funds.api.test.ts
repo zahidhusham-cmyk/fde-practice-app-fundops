@@ -38,3 +38,77 @@ describe("GET /api/funds/:fundId", () => {
     await api().get("/api/funds/abc").expect(400);
   });
 });
+
+describe("POST /api/funds/:fundId/lps", () => {
+  it("creates a new LP with the given commitment", async () => {
+    const fundId = await fundIdByName("Aldermoor Growth Fund I");
+    const res = await api()
+      .post(`/api/funds/${fundId}/lps`)
+      .send({ name: "New Investor Corp", commitment_cents: 5_000_000_00 })
+      .expect(201);
+
+    expect(res.body).toMatchObject({
+      fund_id: fundId,
+      name: "New Investor Corp",
+      commitment_cents: 5_000_000_00,
+    });
+    expect(res.body.id).toEqual(expect.any(Number));
+  });
+
+  it("trims whitespace from the LP name", async () => {
+    const fundId = await fundIdByName("Aldermoor Growth Fund I");
+    const res = await api()
+      .post(`/api/funds/${fundId}/lps`)
+      .send({ name: "  Trimmed Investor  ", commitment_cents: 2_000_000_00 })
+      .expect(201);
+
+    expect(res.body.name).toBe("Trimmed Investor");
+  });
+
+  it("adds the new LP to the fund's LP list", async () => {
+    const fundId = await fundIdByName("Aldermoor Growth Fund I");
+    const beforeRes = await api().get(`/api/funds/${fundId}`).expect(200);
+    const beforeCount = beforeRes.body.lps.length;
+
+    await api()
+      .post(`/api/funds/${fundId}/lps`)
+      .send({ name: "Late Joiner Fund", commitment_cents: 10_000_000_00 })
+      .expect(201);
+
+    const afterRes = await api().get(`/api/funds/${fundId}`).expect(200);
+    expect(afterRes.body.lps).toHaveLength(beforeCount + 1);
+
+    const newLp = afterRes.body.lps.find((lp: { name: string }) => lp.name === "Late Joiner Fund");
+    expect(newLp).toMatchObject({
+      name: "Late Joiner Fund",
+      commitment_cents: 10_000_000_00,
+      called_cents: 0,
+      distributed_cents: 0,
+      unfunded_cents: 10_000_000_00,
+    });
+  });
+
+  it.each([
+    [{ commitment_cents: 0 }, "positive"],
+    [{ commitment_cents: -100 }, "positive"],
+    [{ commitment_cents: 100.5 }, "integer"],
+    [{ commitment_cents: "1000" }, "number"],
+    [{ name: "", commitment_cents: 1000 }, "non-empty"],
+    [{ name: "   ", commitment_cents: 1000 }, "non-empty"],
+    [{}, "string"],
+  ])("rejects invalid input %j with 400", async (body) => {
+    const fundId = await fundIdByName("Aldermoor Growth Fund I");
+    const res = await api()
+      .post(`/api/funds/${fundId}/lps`)
+      .send(body)
+      .expect(400);
+    expect(res.body.error).toEqual(expect.any(String));
+  });
+
+  it("returns 404 for an unknown fund", async () => {
+    await api()
+      .post("/api/funds/9999/lps")
+      .send({ name: "Any Investor", commitment_cents: 1_000_000_00 })
+      .expect(404);
+  });
+});

@@ -16,6 +16,21 @@ export interface LpBalanceRow extends LpRow {
   distributed_cents: number;
 }
 
+export async function insertLp(
+  db: Db,
+  fundId: number,
+  name: string,
+  commitmentCents: number,
+): Promise<LpRow> {
+  const { rows } = await db.query<LpRow>(
+    `INSERT INTO lps (fund_id, name, commitment_cents)
+     VALUES ($1, $2, $3)
+     RETURNING id, fund_id, name, commitment_cents`,
+    [fundId, name, commitmentCents],
+  );
+  return rows[0]!;
+}
+
 export async function listLpsForFund(db: Db, fundId: number): Promise<LpRow[]> {
   const { rows } = await db.query<LpRow>(
     `SELECT id, fund_id, name, commitment_cents

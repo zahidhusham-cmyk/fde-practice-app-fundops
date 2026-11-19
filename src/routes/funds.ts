@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as capitalCalls from "../services/capitalCalls";
 import * as distributions from "../services/distributions";
 import * as funds from "../services/funds";
-import { parseAmountCents, parseDate, parseId, parseOptionalText } from "../lib/validation";
+import { parseAmountCents, parseDate, parseId, parseOptionalText, parseText } from "../lib/validation";
 
 export const fundsRouter = Router();
 
@@ -40,6 +40,17 @@ fundsRouter.post("/:fundId/distributions", async (req, res) => {
     distributionDate: parseDate(body.distribution_date, "distribution_date"),
     amountCents: parseAmountCents(body.amount_cents),
     description: parseOptionalText(body.description, "description"),
+  });
+  res.status(201).json(created);
+});
+
+
+fundsRouter.post("/:fundId/lps", async (req, res) => {
+  const body = req.body ?? {};
+  const created = await funds.createLp({
+    fundId: parseId(req.params.fundId, "fundId"),
+    name: parseText(body.name, "name"),
+    commitmentCents: parseAmountCents(body.commitment_cents),
   });
   res.status(201).json(created);
 });
