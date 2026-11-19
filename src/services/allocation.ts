@@ -27,9 +27,19 @@ export function allocateProRata(amountCents: number, shares: LpShare[]): Allocat
     throw new ValidationError("total commitment must be positive");
   }
 
-  return shares.map((s) => {
+  // Calculate each LP's pro-rata share, rounded to the nearest cent.
+  const allocations = shares.map((s) => {
     const ratio = s.commitmentCents / totalCommitment;
-    // Money is whole cents, so round each LP's share to the nearest cent.
     return { lpId: s.lpId, amountCents: Math.round(amountCents * ratio) };
   });
+
+  // Due to rounding, the total might be off by a cent or two.
+  // Allocate any remainder to the first LP to ensure the total equals exactly the amount.
+  const total = allocations.reduce((sum, a) => sum + a.amountCents, 0);
+  const remainder = amountCents - total;
+  if (remainder !== 0) {
+    allocations[0]!.amountCents += remainder;
+  }
+
+  return allocations;
 }

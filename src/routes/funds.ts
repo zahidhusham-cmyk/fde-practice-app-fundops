@@ -32,3 +32,14 @@ fundsRouter.post("/:fundId/capital-calls", async (req, res) => {
 fundsRouter.get("/:fundId/distributions", async (req, res) => {
   res.json(await distributions.listDistributions(parseId(req.params.fundId, "fundId")));
 });
+
+fundsRouter.post("/:fundId/distributions", async (req, res) => {
+  const body = req.body ?? {};
+  const created = await distributions.createDistribution({
+    fundId: parseId(req.params.fundId, "fundId"),
+    distributionDate: parseDate(body.distribution_date, "distribution_date"),
+    amountCents: parseAmountCents(body.amount_cents),
+    description: parseOptionalText(body.description, "description"),
+  });
+  res.status(201).json(created);
+});

@@ -20,7 +20,7 @@ export async function callsForLpInPeriod(
        JOIN capital_calls c ON c.id = a.capital_call_id
       WHERE a.lp_id = $1
         AND c.call_date >= $2
-        AND c.call_date < $3
+        AND c.call_date <= $3
       ORDER BY c.call_date, c.id`,
     [lpId, start, end],
   );
@@ -40,7 +40,7 @@ export async function distributionsForLpInPeriod(
        JOIN distributions d ON d.id = a.distribution_id
       WHERE a.lp_id = $1
         AND d.distribution_date >= $2
-        AND d.distribution_date < $3
+        AND d.distribution_date <= $3
       ORDER BY d.distribution_date, d.id`,
     [lpId, start, end],
   );

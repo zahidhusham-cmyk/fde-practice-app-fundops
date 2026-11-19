@@ -51,6 +51,15 @@
       </thead>
       <tbody id="distributions"></tbody>
     </table>
+
+    <h2>New distribution</h2>
+    <form id="distribution-form" class="card">
+      <label>Distribution date <input type="date" name="distribution_date" required></label>
+      <label>Amount (USD) <input type="text" name="amount" placeholder="1,000,000.00" required></label>
+      <label>Description <input type="text" name="description" maxlength="200" size="36"></label>
+      <button type="submit">Create distribution</button>
+    </form>
+    <p id="distribution-message" class="message"></p>
   </main>
   <script type="module" src="/js/fund.js"></script>
 </body>

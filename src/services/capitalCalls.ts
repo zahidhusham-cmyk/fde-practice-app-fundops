@@ -2,7 +2,7 @@ import { pool, withTransaction } from "../db/pool";
 import * as callQueries from "../db/queries/capitalCalls";
 import * as fundQueries from "../db/queries/funds";
 import * as lpQueries from "../db/queries/lps";
-import { NotFoundError } from "../lib/errors";
+import { NotFoundError, ValidationError } from "../lib/errors";
 import { allocateProRata } from "./allocation";
 
 export interface CreateCapitalCallInput {
@@ -15,6 +15,7 @@ export interface CreateCapitalCallInput {
 /**
  * Create a capital call and split it across the fund's LPs pro rata by commitment.
  * The call and all of its allocation rows are written in one transaction.
+ * Validates that no LP would be called more than their unfunded commitment.
  */
 export async function createCapitalCall(input: CreateCapitalCallInput) {
   const fund = await fundQueries.getFund(pool, input.fundId);
@@ -25,6 +26,23 @@ export async function createCapitalCall(input: CreateCapitalCallInput) {
     input.amountCents,
     lps.map((lp) => ({ lpId: lp.id, commitmentCents: lp.commitment_cents })),
   );
+
+  // Get current balances to validate unfunded amounts
+  const lpBalances = await lpQueries.listLpBalances(pool, input.fundId);
+
+  // Validate that no LP would be over-called
+  for (const allocation of allocations) {
+    const lpBalance = lpBalances.find((b) => b.id === allocation.lpId);
+    if (!lpBalance) continue; // Should not happen, but skip if it does
+
+    const unfundedCents = lpBalance.commitment_cents - lpBalance.called_cents;
+    if (allocation.amountCents > unfundedCents) {
+      const overageAmountCents = allocation.amountCents - unfundedCents;
+      throw new ValidationError(
+        `This call would ask ${lpBalance.name} for $${(overageAmountCents / 100).toFixed(2)} more than their $${(unfundedCents / 100).toFixed(2)} unfunded commitment.`,
+      );
+    }
+  }
 
   const call = await withTransaction(async (client) => {
     const created = await callQueries.insertCapitalCall(client, input);

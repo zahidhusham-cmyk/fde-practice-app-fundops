@@ -90,6 +90,30 @@ document.getElementById("call-form").addEventListener("submit", async (event) =>
   }
 });
 
+document.getElementById("distribution-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const distributionMessage = document.getElementById("distribution-message");
+  const data = new FormData(form);
+  const amountCents = dollarsToCents(data.get("amount"));
+  if (amountCents === null || amountCents <= 0) {
+    showMessage(distributionMessage, "Enter a positive dollar amount, e.g. 250000.00", "error");
+    return;
+  }
+  try {
+    const distribution = await postJson(`/api/funds/${fundId}/distributions`, {
+      distribution_date: data.get("distribution_date"),
+      amount_cents: amountCents,
+      description: data.get("description"),
+    });
+    showMessage(distributionMessage, `Created a ${formatCents(distribution.amount_cents)} distribution across ${distribution.allocations.length} LPs.`, "ok");
+    form.reset();
+    await Promise.all([loadFund(), loadDistributions()]);
+  } catch (err) {
+    showMessage(distributionMessage, err.message, "error");
+  }
+});
+
 if (!fundId) {
   showMessage(message, "No fund selected.", "error");
 } else {

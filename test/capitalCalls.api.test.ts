@@ -69,6 +69,23 @@ describe("POST /api/funds/:fundId/capital-calls", () => {
       .send({ call_date: "2026-11-20", amount_cents: 1000 })
       .expect(404);
   });
+
+  it("rejects a call that would over-call an LP", async () => {
+    const fundId = await fundIdByName(GROWTH_FUND);
+    // Get current fund balance to know how much is left
+    const fundBefore = await api().get(`/api/funds/${fundId}`).expect(200);
+    const unfundedCents = fundBefore.body.totals.unfunded_cents;
+
+    // Try to call more than the total unfunded amount, which should fail
+    const overCallAmount = unfundedCents + 1_000_000_00; // $10M more than unfunded
+    const res = await api()
+      .post(`/api/funds/${fundId}/capital-calls`)
+      .send({ call_date: "2026-11-20", amount_cents: overCallAmount, purpose: "Over-call attempt" })
+      .expect(400);
+
+    expect(res.body.error).toContain("would ask");
+    expect(res.body.error).toContain("unfunded commitment");
+  });
 });
 
 describe("GET /api/funds/:fundId/capital-calls", () => {
